@@ -6,7 +6,7 @@
 ################################################################################
 
 source("E:\\Career\\PersonalProjects\\DataJam\\code\\djam_functions.r")
-load("djam_data.Rd")
+load("djam_data_new.Rd")
 
 ################################################################################
 # PERFORMANCE DATA
@@ -17,26 +17,30 @@ load("djam_data.Rd")
 sink("output/log_readindata.txt")
 
 # NRL
-fReadData(fileloc = "Extract_2014-2016 NRL", set="NRL")
+fReadData(fileloc = "Extract_2014-2016 NRL Update", set="NRL")
 
 warnings()
 
 # NYC
-fReadData(fileloc = "Extract_2014-2016 NYC", set="NYC")
+fReadData(fileloc = "Extract_2014-2016 NYC Update", set="NYC")
 
 warnings()
 
 # NSWCup
-fReadData(fileloc = "Extract_2015-2016 NSW Cup", set="NSWCup")
+fReadData(fileloc = "Extract_2015-2016 NSW Cup Update", set="NSWCup")
 
 warnings()
 
 # QLDCup
-fReadData(fileloc = "Extract_2015-2016 QLD Cup", set="QLDCup")
+fReadData(fileloc = "Extract_2015-2016 QLD Cup Update", set="QLDCup")
 
 warnings()
 
 sink()
+
+
+# NRL
+fReadData(fileloc = "Extract_2017 NRL Update", set="NRL")
 
 ################################################################################
 # SUMMARISE THE RAW PERFORMANCE DATA ------------------------------------------
@@ -86,6 +90,31 @@ for (i in types){
 
 
 ################################################################################
+# Venue Geocoordinates
+################################################################################
+
+clubgeo <- fread("Clubs_venues_geocoordinates.csv")
+
+names(clubgeo) <- c("club_name", "league_name", "geographical_focus_area", "zone_name", 
+                    "division_name", "club_venue_name", "club_venue_address", "club_venue_suburb", 
+                    "club_venue_state", "club_venue_postcode", 
+                    "club_venue_lat", "club_venue_lon", "club_lga")
+
+# Replace venues_NRL with the geocoded version
+venues_NRL <- fread("venues_NRL_geo.csv")
+
+################################################################################
+# SAVE --------------------------------------------------------------------
+
+save.image("djam_data_new.Rd")
+
+nrldatalist <- c("clubgeo", "venues_NRL", "clubs_NRL", "events_NRL", "lineups_NRL", 
+                 "matches_NRL", "players_NRL", "positions_NRL", "seasons_NRL", 
+                 "series_NRL", "trx_NRL", "weatherconditions_NRL")
+
+save(list=nrldatalist, file="djam_data_nrl.Rd")
+
+################################################################################
 # PARTICIPATION DATA
 ################################################################################
 
@@ -125,8 +154,6 @@ part_address[, Post:=ifelse(Post=='#N/A', "", Post)]
 fSummariseData(data=c("part_player", "part_address"), sinkloc="output/")
 
 ################################################################################
-# SAVE --------------------------------------------------------------------
+# SAVE PARTICIPATION ---------------------------------------------------------
 
-save.image("djam_data.Rd")
-
-
+# save(part_player, part_address, )

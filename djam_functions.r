@@ -13,6 +13,7 @@ setwd("E:\\Career\\PersonalProjects\\DataJam\\data")
 library(data.table)
 library(magrittr)
 library(Hmisc)
+library(lubridate)
 
 # FUNCTIONS ---------------------------------------------------------------
 
@@ -134,3 +135,57 @@ fCleanTRXData <- function(dat){
   assign(dat, data, envir = .GlobalEnv)
   
 } # end fCleanTRXData function
+
+################################################################################
+# ftrx_agg <-
+
+ftrx_agg <- function(dat){
+  
+  receives <- dat[EventCode=="RCVS", .(receives=.N), by=.(MatchId, ClubId)]
+
+  linebreak_assist <- dat[EventCode=="LAPS", .(linebreak_assist=.N), by=.(MatchId, ClubId)]
+  
+  tries <- dat[EventCode=="TRY", .(tries=.N), by=.(MatchId, ClubId)]
+  
+  try_assist <- dat[EventCode=="TRAS", .(try_assist=.N), by=.(MatchId, ClubId)]
+  
+  line_engage <- dat[EventCode=="RORS" & Qualifier2Name=="Run Impact", .(line_engage=.N), by=.(MatchId, ClubId)]
+  
+  supports <- dat[EventCode=="RSPS", .(supports=.N), by=.(MatchId, ClubId)]
+  
+  line_not_engage <- dat[EventCode=="LNNS", .(line_not_engage=.N), by=.(MatchId, ClubId)]
+  
+  breakcause <- dat[EventCode=="BKCS", .(breakcause=.N), by=.(MatchId, ClubId)]
+  
+  missed_tackles <- dat[EventCode=="TKMS" | EventCode=="TKMD", .(missed_tackles=.N), by=.(MatchId, ClubId)]
+  
+  # dat[EventCode=="ERRS", .N, by=Qualifier5]
+  
+  kick_error <- dat[EventCode=="ERRS" & Qualifier5=="Kicking error", .(kick_error=.N), by=.(MatchId, ClubId)]
+  
+  hand_error <- dat[EventCode=="ERRS" & Qualifier5=="Handling error", .(hand_error=.N), by=.(MatchId, ClubId)]
+  
+  ## Merge the trx aggs together
+  trx_agg <- merge(receives, linebreak_assist, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, tries, by=c("MatchId", "ClubId"), all=T)          
+  
+  trx_agg <- merge(trx_agg, try_assist, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, line_engage, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, line_not_engage, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, kick_error, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, hand_error, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, supports, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, breakcause, by=c("MatchId", "ClubId"), all=T)
+  
+  trx_agg <- merge(trx_agg, missed_tackles, by=c("MatchId", "ClubId"), all=T)
+
+  summary(trx_agg)
+  return(trx_agg)
+} # end function
